@@ -39,7 +39,7 @@
 // Use project enums instead of #define for ON and OFF.
 
 #include <xc.h>
-// #include <stdint.h>
+#include <stdint.h>
 
 #define _XTAL_FREQ 1000000 // INTERNAL OSCILLATOR 1MHz
 #define LOAD_TRIS TRISCbits.TRISC2
@@ -87,7 +87,7 @@ void main(void) {
     
     MAX7219_send(0x0F, 0x00);
     MAX7219_send(0x09, 0x00);
-    MAX7219_send(0x0A, 0x05);
+    MAX7219_send(0x0A, 0x00);
     MAX7219_send(0x0B, 0x07);
     MAX7219_send(0x0C, 0x01);
     
@@ -95,7 +95,15 @@ void main(void) {
     for (int i = 1; i <= 8; i++){
         MAX7219_send(i, 0x00);
     }
-    MAX7219_send(0x01, 0x0F);
-//    while (1);
+    
+    while (1) {
+        for (int i = 1; i <= 8; i++){
+            for (int j = 0; j < 8; j++) {
+                MAX7219_send(i, 0x01 << j);
+                __delay_ms(500);
+            }
+            MAX7219_send(i, 0x00);
+        }
+    }
 }
 
