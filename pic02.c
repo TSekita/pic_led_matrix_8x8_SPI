@@ -39,6 +39,7 @@
 // Use project enums instead of #define for ON and OFF.
 
 #include <xc.h>
+// #include <stdint.h>
 
 #define _XTAL_FREQ 1000000 // INTERNAL OSCILLATOR 1MHz
 #define LOAD_TRIS TRISCbits.TRISC2
@@ -46,30 +47,34 @@
 
 void SPI1_Init(void) {
     
-    RC3PPS = 0x1F;       // RC3 Å® SCK1 output
-    RC4PPS = 0x1E;       // RC4 Å® SDO1 output
-    SSP1CLKPPS = 0x13;   // SCK1 input Å© RC3
-    SSP1DATPPS = 0x14;   // SDO1 input Å© RC4
+    RC3PPS = 0x14;       // RC3  SCK1 output
+    RC4PPS = 0x15;       // RC4  SDO1 output
+//    SSP1CLKPPS = 0x13;   // SCK1 input  RC3
+    //SSP1DATPPS = 0x15;   // SDO1 input  RC5
     
     TRISCbits.TRISC3 = 0;
     TRISCbits.TRISC4 = 0;
-    TRISCbits.TRISC5 = 1;
+    //TRISCbits.TRISC5 = 1;
     
     SSP1STAT = 0x40;
     SSP1CON1 = 0x20;
+    
+    SSP1CON1bits.SSPEN = 1;
 }
 
 void SPI1_Write(uint8_t data) {
     SSP1BUF = data;
     while (!SSP1STATbits.BF);
-    (void)SSP1BUF;
+    // (void)SSP1BUF;
 }
 
 void MAX7219_send(uint8_t address, uint8_t data) {
     LOAD_LAT = 0;
+    __delay_us(1);
     SPI1_Write(address);
     SPI1_Write(data);
     LOAD_LAT = 1;
+    __delay_us(10);
 }
 
 void main(void) {
@@ -78,14 +83,19 @@ void main(void) {
     LOAD_TRIS = 0;
     LOAD_LAT = 1;
     
-    __delay_ms(100);
+    __delay_ms(200);
     
-    MAX7219_send(0x0C, 0x01);
     MAX7219_send(0x0F, 0x00);
-    MAX7219_send(0x0B, 0x07);
-    MAX7219_send(0x0A, 0x03);
     MAX7219_send(0x09, 0x00);
+    MAX7219_send(0x0A, 0x05);
+    MAX7219_send(0x0B, 0x07);
+    MAX7219_send(0x0C, 0x01);
     
-    MAX7219_send(0x01, 0x01);
+    
+    for (int i = 1; i <= 8; i++){
+        MAX7219_send(i, 0x00);
+    }
+    MAX7219_send(0x01, 0x0F);
+//    while (1);
 }
 
